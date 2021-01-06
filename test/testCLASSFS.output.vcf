@@ -1,0 +1,24 @@
+##fileformat=VCFv4.1
+##fileDate=2021-01-06
+##INFO=<ID=CAVA_TYPE,Number=.,Type=String,Description="Variant type: Substitution, Insertion, Deletion or Complex",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_GENE,Number=.,Type=String,Description="HGNC gene symbol",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_TRANSCRIPT,Number=.,Type=String,Description="Transcript identifier",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_GENEID,Number=.,Type=String,Description="Gene identifier",Source="CAVA",Version="1.2.4">
+##INFO=<ID=CAVA_TRINFO,Number=.,Type=String,Description="Transcript information: Strand/Length of transcript/Number of exons/Length of coding DNA + UTR/Protein length",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_LOC,Number=.,Type=String,Description="Location of variant in transcript",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_CSN,Number=.,Type=String,Description="CSN annotation",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_PROTPOS,Number=.,Type=String,Description="Protein position",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_PROTREF,Number=.,Type=String,Description="Reference amino acids",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_PROTALT,Number=.,Type=String,Description="Alternate amino acids",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_CLASS,Number=.,Type=String,Description="5PU: Variant in 5 prime untranslated region, 3PU: Variant in 3 prime untranslated region, INT: Intronic variant that does not alter splice site bases, SS: Intronic variant that alters a splice site base but not an ESS or SS5 base, ESS: Variant that alters essential splice site base (+1,+2,-1,-2), SS5: Variant that alters the +5 splice site base, but not an ESS base, SY: Synonymous change caused by a base substitution (i.e. does not alter amino acid), NSY: Nonsynonymous change (missense) caused by a base substitution (i.e. alters amino acid), IF: Inframe insertion and/or deletion (variant alters the length of coding sequence but not the frame), IM: Variant that alters the start codon, SG: Variant resulting in stop-gain (nonsense) mutation, SL: Variant resulting in stop-loss mutation, FS: Frameshifting insertion and/or deletion (variant alters the length and frame of coding sequence), EE: Inframe deletion, insertion or base substitution which affects the first or last three bases of the exon",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_SO,Number=.,Type=String,Description="Sequence Ontology term",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_ALTFLAG,Number=.,Type=String,Description="None: variant has the same CSN annotation regardless of its left or right-alignment, AnnNotClass/AnnNotSO/AnnNotClassNotSO: indel has an alternative CSN but the same CLASS and/or SO, AnnAndClass/AnnAndSO/AnnAndClassNotSO/AnnAndSONotClass/AnnAndClassAndSO: Multiple CSN with different CLASS and/or SO annotations",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_ALTANN,Number=.,Type=String,Description="Alternate CSN annotation",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_ALTCLASS,Number=.,Type=String,Description="Alternate CLASS annotation",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_ALTSO,Number=.,Type=String,Description="Alternate SO annotation",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_IMPACT,Number=.,Type=String,Description="Impact group the variant is stratified into",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_DBSNP,Number=.,Type=String,Description="rsID from dbSNP",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_HGVSc,Number=.,Type=String,Description="HGVS Nomenclature for cDNA changes",Source="CAVA",Version="1.3.3">
+##INFO=<ID=CAVA_HGVSp,Number=.,Type=String,Description="HGVS Nomenclature for protein changes",Source="CAVA",Version="1.3.3">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+1	17022712	CI034610	C	CA	30	PASS	CAVA_TYPE=Insertion;CAVA_TRANSCRIPT=NM_003000.2;CAVA_GENE=SDHB;CAVA_GENEID=6390;CAVA_TRINFO=-/35.4kb/8/1.2kb/280;CAVA_LOC=Ex7;CAVA_CSN=c.660dupT;CAVA_CSNHGVS=c.660dupT;CAVA_PROTPOS=221;CAVA_PROTREF=D;CAVA_PROTALT=.;CAVA_CLASS=SG;CAVA_SO=frameshift_variant;CAVA_IMPACT=1;CAVA_ALTANN=c.658_659insT;CAVA_ALTCLASS=.;CAVA_ALTSO=.;CAVA_HGVSc=NM_003000.2(SDHB):c.660dupT;CAVA_HGVSp=.	GT:AD:DP	0/1:50,50:100

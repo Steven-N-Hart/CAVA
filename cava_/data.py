@@ -182,6 +182,7 @@ class Ensembl(object):
         GENEIDstring = ''
         LOCstring = ''
         CSNstring = ''
+        CSNHGVSstring = ''
         CLASSstring = ''
         ALTFLAGstring = ''
         TRINFOstring = ''
@@ -221,6 +222,7 @@ class Ensembl(object):
                 TRINFOstring += ':'
                 LOCstring += ':'
                 CSNstring += ':'
+                CSNHGVSstring += ':'
                 CLASSstring += ':'
                 ALTFLAGstring += ':'
                 ALTANNstring += ':'
@@ -249,6 +251,7 @@ class Ensembl(object):
                     LOCstring += '.'
 
             CSNstring += '.'
+            CSNHGVSstring += '.'
             CLASSstring += '.'
             ALTFLAGstring += '.'
             ALTANNstring += '.'
@@ -276,6 +279,7 @@ class Ensembl(object):
                 TRINFOstring += ':'
                 LOCstring += ':'
                 CSNstring += ':'
+                CSNHGVSstring += ':'
                 CLASSstring += ':'
                 ALTFLAGstring += ':'
                 ALTANNstring += ':'
@@ -355,19 +359,26 @@ class Ensembl(object):
             if TRANSCRIPT in list(transcripts_plus.keys()):
                 csn_plus, protchange_plus = csn.getAnnotation(variant_plus, transcript, reference, protein,
                                                               mutprotein_plus)
+                csn_plus_hgvs, protchange_plus = csn.getAnnotationNew(variant_plus, transcript, reference, protein,
+                                                              mutprotein_plus)
                 csn_plus_str = csn_plus.getAsString()
+                csn_plus_hgvs_str = csn_plus_hgvs.getAsString()
             else:
-                csn_plus_str, protchange_plus = '.', ('.', '.', '.')
+                csn_plus_str, csn_plus_hgvs_str, protchange_plus = '.', '.', ('.', '.', '.')
 
             if difference:
                 if TRANSCRIPT in list(transcripts_minus.keys()):
                     csn_minus, protchange_minus = csn.getAnnotation(variant_minus, transcript, reference, protein,
                                                                     mutprotein_minus)
+
+                    csn_minus_hgvs, protchange_minus = csn.getAnnotation(variant_minus, transcript, reference, protein,
+                                                                    mutprotein_minus)
                     csn_minus_str = csn_minus.getAsString()
+                    csn_minus_hgvs_str = csn_minus_hgvs.getAsString()
                 else:
-                    csn_minus_str, protchange_minus = '.', ('.', '.', '.')
+                    csn_minus_str, csn_minus_hgvs_str,protchange_minus = '.', '.', ('.', '.', '.')
             else:
-                csn_minus_str, protchange_minus = csn_plus_str, protchange_plus
+                csn_minus_str,  csn_minus_hgvs_str, protchange_minus = csn_plus_str, csn_plus_hgvs_str, protchange_plus
 
             # CLASS, SO and IMPACT
 
@@ -434,11 +445,13 @@ class Ensembl(object):
                 else:
                     so_minus = so_plus
 
+
             # Deciding which is the correct CSN and CLASS annotation
             if transcript.strand == 1:
                 class_plus, class_minus = self.correctClasses(csn_plus_str, class_plus, class_minus)
                 so_plus, so_minus = self.correctSOs(csn_plus_str, so_plus, so_minus)
                 CSNstring += csn_plus_str
+                CSNHGVSstring += csn_plus_hgvs_str
                 CLASSstring += class_plus
                 ALTANN = csn_minus_str
                 altCLASS = class_minus
@@ -453,6 +466,7 @@ class Ensembl(object):
                 class_plus, class_minus = self.correctClasses(csn_minus_str, class_plus, class_minus)
                 so_plus, so_minus = self.correctSOs(csn_minus_str, so_plus, so_minus)
                 CSNstring += csn_minus_str
+                CSNHGVSstring += csn_minus_hgvs_str
                 CLASSstring += class_minus
                 ALTANN = csn_plus_str
                 altCLASS = class_plus
@@ -527,6 +541,7 @@ class Ensembl(object):
         variant.addFlag('TRINFO', TRINFOstring)
         variant.addFlag('LOC', LOCstring)
         variant.addFlag('CSN', CSNstring)
+        variant.addFlag('CSNHGVS', CSNHGVSstring)
         variant.addFlag('PROTPOS', PROTPOSstring)
         variant.addFlag('PROTREF', PROTREFstring)
         variant.addFlag('PROTALT', PROTALTstring)

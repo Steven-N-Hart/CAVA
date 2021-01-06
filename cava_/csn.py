@@ -84,6 +84,37 @@ def getAnnotation(variant, transcript, reference, prot, mutprot):
     return csn, protchange
 
 
+# Getting CSN annotation of a given variant
+def getAnnotationNew(variant, transcript, reference, prot, mutprot):
+    # Creating csn annotation coordinates
+    coord1, intr1, coord2, intr2 = calculateCSNCoordinates(variant, transcript)
+
+    # Creating DNA level annotation
+    try:
+        dna, dna_ins = makeDNAannotation(variant, transcript, reference)
+#        dna, dna_ins = makeDNAannotationNew(variant, transcript, reference)
+    except TypeError:
+        dna, dna_ins = 'X', 'X'
+
+    # Creating protein level annotation
+    where = transcript.whereIsThisVariant(variant)
+    if not '-' in where and where.startswith('Ex'):
+        protein, protchange = makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1)
+    else:
+        protein, protchange = '', ('.', '.', '.')
+
+    # Transforming coordinates if the variant is a duplication
+    if not dna_ins == '':
+        coord1_ins, intr1_ins, coord2_ins, intr2_ins = coord1, intr1, coord2, intr2
+        coord1, intr1, coord2, intr2 = duplicationCoordinates(variant, transcript)
+    else:
+        coord1_ins, intr1_ins, coord2_ins, intr2_ins = '', '', '', ''
+
+    # Creating and returning csnAnnot object
+    csn = CSNAnnot(coord1, intr1, coord2, intr2, dna, protein, coord1_ins, intr1_ins, coord2_ins, intr2_ins, dna_ins)
+    return csn, protchange
+
+
 # Calculating csn annotation coordinates
 def calculateCSNCoordinates(variant, transcript):
     # Returning coordinates if variant is a base substitution
@@ -171,6 +202,168 @@ def makeDNAannotation(variant, transcript, reference):
             return 'delins' + variant.alt.reverseComplement(), ''
 
 
+# Calculating DNA level annotation of the variant
+# this is just a placeholder routine for new functionality.
+def makeDNAannotationNew(variant, transcript, reference):
+    # Returning DNA level annotation if variant is a base substitution
+    if variant.isSubstitution():
+        if transcript.strand == 1:
+            return variant.ref + '>' + variant.alt, ''
+        else:
+            return variant.ref.reverseComplement() + '>' + variant.alt.reverseComplement(), ''
+
+# XXX-HS . To support repeat annotation (only applied is (len(variant.alt) %3==0, this code must also be refactored to return the genomic annotation and the cDNA annotation
+#      the '[]' notation is to be made at the genomic level... but with shifting that depends on the strand orientation
+#      .. also may need to support repeats that are have single sequencing errors... hybrid repeats
+# 
+    if variant.isInsertion():
+        insert = core.Sequence(variant.alt)
+        if transcript.strand == 1:
+            if len(variant.alt) %3==0:
+                a=1 # Placeholder for code to check if there is a repeat at the DNA level.
+
+            before = reference.getReference(variant.chrom, variant.pos - len(insert), variant.pos - 1)
+            # Checking if variant is a duplication
+            if insert == before and (variant.pos - len(insert) >= transcript.transcriptStart):
+                if len(insert) > 4: return 'dup' + str(len(insert)), 'ins' + insert
+                return 'dup' + insert, 'ins' + insert
+            else:
+                return 'ins' + insert, ''
+        else:
+            if len(variant.alt) %3==0:
+                a=1 # Placeholder for code to check if there is a repeat at the DNA level.
+            before = reference.getReference(variant.chrom, variant.pos, variant.pos + len(insert) - 1)
+            # Checking if variant is a duplication
+            if insert == before and (variant.pos + len(insert) - 1 <= transcript.transcriptEnd):
+                if len(insert) > 4: 
+                    return 'dup' + str(len(insert)), 'ins' + insert.reverseComplement()
+                return 'dup' + insert.reverseComplement(), 'ins' + insert.reverseComplement()
+            else:
+                return 'ins' + insert.reverseComplement(), ''
+
+
+    # Returning DNA level annotation if variant is a deletion
+    if variant.isDeletion():
+        if len(variant.ref) %3==0:
+            a=1 # Placeholder for code to check if there is a repeat at the DNA level.. Strand-Dependent.
+        if len(variant.ref) > 4:
+            return 'del' + str(len(variant.ref)), ''
+        if transcript.strand == 1:
+            return 'del' + variant.ref, ''
+        else:
+            return 'del' + core.Sequence(variant.ref).reverseComplement(), ''
+
+
+    # Returning DNA level annotation if variant is a complex indel
+    if variant.isComplex():
+        if len(variant.alt) %3==0 and len(variant.ref) %3==0:
+                a=1 # Placeholder for code to check if there is a repeat at the DNA level. 
+                    # This code must be able to handle repeats with sequence variation.. and be strand-dependent.
+        if transcript.strand == 1:
+            return 'delins' + variant.alt, ''
+        else:
+            return 'delins' + variant.alt.reverseComplement(), ''
+
+
+
+# Calculating protein level annotation of the variant
+def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
+
+    protcopy = prot[:]
+
+    # Checking if there was no change in protein sequence
+    if prot == mutprot:
+        idx = coord1 / 3
+        if coord1 % 3 > 0: idx += 1
+        return '_p.=', (str(idx), prot[idx-1], prot[idx-1])
+
+    # Checking if the variant affects the initiating amino acid
+    if prot[0] != mutprot[0]: return '_p.' + changeTo3letters(prot[0]) + '1?', ('1', prot[0], mutprot[0])
+
+    # Trimming common starting substring
+    leftindex = 1
+    rightindex = len(prot)
+    while len(prot) > 0 and len(mutprot) > 0:
+        if prot[0] == mutprot[0]:
+            prot = prot[1:]
+            mutprot = mutprot[1:]
+            leftindex += 1
+        else:
+            break
+
+    if prot == '': return '', ('.','.','.')
+
+    # Frameshift mutations
+    if (len(variant.alt) - len(variant.ref)) % 3 > 0:
+        if len(prot) > 0: return '', (str(leftindex), prot[0], '.')
+    else: return '', (str(leftindex), '.', '.')
+
+    # Checking if variant results in a stop lost mutation
+    if prot[0] == 'X' and len(mutprot) == 0:
+        return '_p.X' + str(leftindex) + '?extX?', (str(leftindex), 'X', '?')
+
+    if prot[0] == 'X' and mutprot[0] != 'X':
+        nextstop = mutprot.find('X')
+        if nextstop != -1:
+            return '_p.X' + str(leftindex) + changeTo3letters(mutprot[0]) + 'extX' + str(nextstop), (str(leftindex), 'X', mutprot[0])
+        else:
+            return '_p.X' + str(leftindex) + changeTo3letters(mutprot[0]) + 'extX?', (str(leftindex), 'X', mutprot[0])
+
+    # Trimming common ending substring
+    while len(prot) > 0 and len(mutprot) > 0:
+        if prot[-1] == mutprot[-1]:
+            prot = prot[:-1]
+            mutprot = mutprot[:-1]
+            rightindex -= 1
+        else:
+            break
+
+    # Checking if variant results in an amino acid change
+    if len(prot) == 1 and len(mutprot) == 1: return '_p.' + changeTo3letters(prot) + str(leftindex) + changeTo3letters(
+        mutprot), (str(leftindex), prot, mutprot)
+
+    # Checking if variant results in a deletion
+    if len(mutprot) == 0:
+        if len(prot) == 1:
+            return '_p.' + changeTo3letters(prot) + str(leftindex) + 'del', (str(leftindex), prot, '-')
+        else:
+            if leftindex == rightindex: protpos = str(leftindex)
+            else: protpos = str(leftindex) + '-' + str(rightindex)
+            return '_p.' + changeTo3letters(prot[0]) + str(leftindex) + '_' + changeTo3letters(prot[-1]) + str(
+                rightindex) + 'del',  (protpos, prot, '-')
+
+    # Checking if variant results in an insertion or duplication
+    if len(prot) == 0:
+        if protcopy[leftindex - len(mutprot) - 1:leftindex - 1] == mutprot:
+            if len(mutprot) == 1:
+                return '_p.' + changeTo3letters(protcopy[leftindex - len(mutprot) - 1]) + str(
+                    leftindex - len(mutprot)) + 'dup',  (str(leftindex - 1)+'-'+str(rightindex + 1), '-', mutprot)
+            else:
+                return '_p.' + changeTo3letters(protcopy[leftindex - len(mutprot) - 1]) + str(
+                    leftindex - len(mutprot)) + '_' + changeTo3letters(protcopy[leftindex - 2]) + str(
+                    leftindex - 1) + 'dup',  (str(leftindex - 1)+'-'+str(rightindex + 1), '-', mutprot)
+        if 'X' in mutprot: mutprot = mutprot[:mutprot.find('X') + 1]
+        return '_p.' + changeTo3letters(protcopy[leftindex - 2]) + str(leftindex - 1) + '_' + changeTo3letters(
+            protcopy[rightindex]) + str(rightindex + 1) + 'ins' + changeTo3letters(mutprot), (str(leftindex - 1)+'-'+str(rightindex + 1), '-', mutprot)
+
+    # Checking if variant results in a complex change
+    if len(prot) > 0 and len(mutprot) > 0:
+        ret = '_p.'
+        if len(prot) == 1:
+            ret += changeTo3letters(prot) + str(leftindex)
+        else:
+            ret += changeTo3letters(prot[0]) + str(leftindex) + '_' + changeTo3letters(prot[-1]) + str(rightindex)
+        ret += 'delins'
+        if 'X' in mutprot: mutprot = mutprot[:mutprot.find('X') + 1]
+        ret += changeTo3letters(mutprot)
+
+        if leftindex == rightindex: protpos = str(leftindex)
+        else: protpos = str(leftindex) + '-' + str(rightindex)
+        return ret, (protpos, prot, mutprot)
+
+    return "", ()
+
+
 # Calculating protein level annotation of the variant
 # This code does not try to find new initiation sites upstream of Met1 .. if the the Methionine is destroyed
 # This (new) code should mostly work even if reference protein is incomplete (e.g. not start with Met1 or end with X/ter).. except that we cannot call an extension unless last base is Ter.
@@ -195,7 +388,7 @@ def makeDNAannotation(variant, transcript, reference):
 # 
 # Coord1 is 1-based position in the CDS .. and is ONLY used to report Synonymous variants .. it is not used to locate deletions or frameshifts
 # 
-def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
+def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
     if prot == '': return '', ('.', '.', '.')
 # this is used to distringuish frameshift from non-frameshifts.. though an Early Stop codon .. will be coded as nonsense
 #      even if it's a frameshift [HGVS NOTE in fs: the shortest frame shift variantis fsTer2, fsTer1  variants are by definition nonsense variants]
@@ -601,7 +794,7 @@ def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
     return "", ()
 
 
-# Transforming a genomic position ot csn coordinate
+# Transforming a genomic position to csn coordinate
 def transformToCSNCoordinate(pos, transcript):
     prevExonEnd = 99999999
 
@@ -645,7 +838,6 @@ def transformToCSNCoordinate(pos, transcript):
 
     # If genomic position is outside CDS
     else:
-
         sumpos = 0
         for i in range(len(transcript.exons)):
             exon = transcript.exons[i]

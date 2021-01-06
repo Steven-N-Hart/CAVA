@@ -360,12 +360,14 @@ class Record(object):
                 transcripts_list = flagvalues[flags.index('TRANSCRIPT')]
                 gene_list = flagvalues[flags.index('GENE')]
                 csn_list = flagvalues[flags.index('CSN')]
+                csn_hgvs_list = flagvalues[flags.index('CSNHGVS')]
                 if not (len(transcripts_list) == 0 or len(gene_list) != len(transcripts_list) or len(gene_list) != len(
                         csn_list)):
                     for ihg in range(0, len(transcripts_list)):  # Loop over alt-alleles
                         hgtranscripts = transcripts_list[ihg].split(":")
                         hggenes = gene_list[ihg].split(":")
                         hgcsns = csn_list[ihg].split(":")
+                        hgcsns_hgvs = csn_hgvs_list[ihg].split(":")
                         if not (len(hgtranscripts) == len(hggenes) and len(hgtranscripts) == len(hgcsns)):
                             print("ERROR transcripts GENE and CSN not same length\n")
                             print("--------------------------------------------------------------------\n")
@@ -379,13 +381,15 @@ class Record(object):
                                 hgtranscript = hgtranscripts[itr]
                                 hggene = hggenes[itr]
                                 hgcsn = hgcsns[itr]
+                                hgcsn_hgvs = hgcsns_hgvs[itr]
                                 tHGVSC = hgtranscript
                                 tHGVSC += '(' + hggene + '):'
                                 try:
-                                    cdna, prot = hgcsn.split('_p.')
-                                    prot = prot.replace('extX', "extTer")
+#                                    cdna, prot = hgcsn.split('_p.')
+#                                    prot = prot.replace('extX', "extTer")
+                                    cdna, prot = hgcsn_hgvs.split('_p.')
                                 except ValueError:  # Example c.802-51_802-14del38, splice
-                                    cdna = hgcsn
+                                    cdna = hgcsn_hgvs
                                     prot = '.'
                                 tHGVSC += cdna
                                 if tHGVSC == '.(.):.':
@@ -403,8 +407,7 @@ class Record(object):
                                         # provide incorrect HGVSP
                                         tHGVSP = '.'
                                         # Only report warning if transcript2protein mapping file was provided.
-                                        if len(
-                                                options.transcript2protein) > 0:
+                                        if len(options.transcript2protein) > 0:
                                             print(
                                                 "WARNING: transcript " + hgtranscript + " not in transcript2protein "
                                                                                         "file, HGVSp will be invalid\n")
@@ -648,7 +651,7 @@ class Transcript(object):
         else:
             return ret, exonseqs
 
-    # Getting the translated protein sequence of the transcript
+    # Getting the translated protein sequence of the transcript with the variant included as well as a list of the (reference) exon sequence.
     def getProteinSequence(self, reference, variant, exonseqs, codon_usage):
         # Translating coding sequence
         codon_usage = codon_usage
