@@ -597,18 +597,18 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
         else:
             if SSRlen==1: # Repeat unit of 1 base.
                 if nMatch_ref==0: # Multiple >1 copies are deleted, leaving empty sequence. Guaranteed to be an interval of at least 2 AA positions to be called SSR
-                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref+nMatch_del)+"];["+str(nMatch_ref) + "]",(str(leftindex)+'-'+str(rightindex),trim_prot,'-')
+                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref+nMatch_del)+"]%3B["+str(nMatch_ref) + "]",(str(leftindex)+'-'+str(rightindex),trim_prot,'-')
                 else:
                     if leftindex==rightindex:
-                        return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref+nMatch_del)+"];["+str(nMatch_ref) + "]",(str(leftindex),trim_prot,'-')
+                        return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref+nMatch_del)+"]%3B["+str(nMatch_ref) + "]",(str(leftindex),trim_prot,'-')
                     else:
-                        return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref+nMatch_del)+"];["+str(nMatch_ref) + "]",(str(leftindex)+'-'+str(rightindex),trim_prot,'-')
+                        return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref+nMatch_del)+"]%3B["+str(nMatch_ref) + "]",(str(leftindex)+'-'+str(rightindex),trim_prot,'-')
 
             else: # Multi base repeat
                 if nMatch_ref==0: # Deletion of repeats leaving no copies
-                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"_"+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"["+str(nMatch_ref+nMatch_del)+"];["+str(nMatch_ref) + "]",(str(leftindex)+"-"+str(rightindex),trim_prot,'-')
+                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"_"+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"["+str(nMatch_ref+nMatch_del)+"]%3B["+str(nMatch_ref) + "]",(str(leftindex)+"-"+str(rightindex),trim_prot,'-')
                 else:
-                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"_"+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"["+str(nMatch_ref+nMatch_del)+"];["+str(nMatch_ref) + "]",(str(leftindex)+'-'+str(rightindex),trim_prot,'-')
+                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"_"+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"["+str(nMatch_ref+nMatch_del)+"]%3B["+str(nMatch_ref) + "]",(str(leftindex)+'-'+str(rightindex),trim_prot,'-')
 
 #
 # Pure insertion/Repeat/Dup .. not frameshift Extension
@@ -664,9 +664,9 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
                     return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+'_'+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"dup",(str(leftindex-1)+'-'+str(rightindex+1),'-',trim_mutprot)
             else:
                 if SSRlen==1:
-                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref)+"];["+str(nMatch_ref+nMatch_ins) + "]",(str(leftindex-1)+'-'+str(rightindex+1),'-',trim_mutprot)
+                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+"["+str(nMatch_ref)+"]%3B["+str(nMatch_ref+nMatch_ins) + "]",(str(leftindex-1)+'-'+str(rightindex+1),'-',trim_mutprot)
                 else:
-                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+'_'+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"["+str(nMatch_ref)+"];["+str(nMatch_ref+nMatch_ins) + "]",(str(leftindex-1)+'-'+str(rightindex+1),'-',trim_mutprot)
+                    return '_p.'+changeTo3lettersTer(protcopy[lowerlim])+str(lowerlim+1)+'_'+changeTo3lettersTer(protcopy[upperlim-1])+str(upperlim)+"["+str(nMatch_ref)+"]%3B["+str(nMatch_ref+nMatch_ins) + "]",(str(leftindex-1)+'-'+str(rightindex+1),'-',trim_mutprot)
             
 
 

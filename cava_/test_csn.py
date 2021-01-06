@@ -191,7 +191,7 @@ class TestmakeProteinString(unittest.TestCase):
         print("Testing checking ssr 1 to 3 copies of 2-long SSR")
         variant = Variant("chr1",1000,"C","T")
         actual = makeProteinString(variant,"NM","chr1","MLYRX","MLYLYLYRX",6)
-        expected = ('_p.Leu2_Tyr3[1];[3]', ('3-4', '-', 'LYLY'))
+        expected = ('_p.Leu2_Tyr3[1]%3B[3]', ('3-4', '-', 'LYLY'))
         self.assertEqual(actual, expected)
 
     def test_makeProteinString_ssr2_gain0to3(self):
@@ -205,14 +205,14 @@ class TestmakeProteinString(unittest.TestCase):
         print("Testing checking ssr 2-long deletion")
         variant = Variant("chr1",1000,"C","T")
         actual = makeProteinString(variant,"NM","chr1","MLYLYRX","MLYRX",6)
-        expected = ('_p.Leu2_Tyr3[2];[1]', ('4-5', 'LY', '-'))
+        expected = ('_p.Leu2_Tyr3[2]%3B[1]', ('4-5', 'LY', '-'))
         self.assertEqual(actual, expected)
 
     def test_makeProteinString_ssr2_loss2to0(self):
         print("Testing checking ssr 2-long deletion to 0")
         variant = Variant("chr1",1000,"C","T")
         actual = makeProteinString(variant,"NM","chr1","MLYLYRX","MRX",6)
-        expected = ('_p.Leu2_Tyr3[2];[0]', ('2-5', 'LYLY', '-'))
+        expected = ('_p.Leu2_Tyr3[2]%3B[0]', ('2-5', 'LYLY', '-'))
         self.assertEqual(actual, expected)
 
 
@@ -220,13 +220,13 @@ class TestmakeProteinString(unittest.TestCase):
         print("Testing checking 1 to 3 copies of 1-long SSR")
         variant = Variant("chr1",1000,"C","T")
         actual = makeProteinString(variant,"NM","chr1","MLRX","MLLLRX",6)
-        expected = ('_p.Leu2[1];[3]', ('2-3', '-', 'LL'))
+        expected = ('_p.Leu2[1]%3B[3]', ('2-3', '-', 'LL'))
         self.assertEqual(actual, expected)
 
     def test_makeProteinString_ssr1_loss2to1(self):
         print("Testing checking ssr 2-long deletion")
         variant = Variant("chr1",1000,"C","T")
         actual = makeProteinString(variant,"NM","chr1","MLLRX","MLRX",6)
-        expected = ('_p.Leu2[2];[1]', ('3', 'L', '-'))
+        expected = ('_p.Leu2[2]%3B[1]', ('3', 'L', '-'))
         self.assertEqual(actual, expected)
 
