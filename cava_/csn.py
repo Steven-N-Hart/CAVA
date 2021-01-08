@@ -273,7 +273,7 @@ def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
 
     # Checking if there was no change in protein sequence
     if prot == mutprot:
-        idx = coord1 / 3
+        idx = int(coord1 / 3)
         if coord1 % 3 > 0: idx += 1
         return '_p.=', (str(idx), prot[idx-1], prot[idx-1])
 
