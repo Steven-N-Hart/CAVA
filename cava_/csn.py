@@ -56,6 +56,7 @@ class CSNAnnot():
 
 # Getting CSN annotation of a given variant
 def getAnnotation(variant, transcript, reference, prot, mutprot):
+
     # Creating csn annotation coordinates
     coord1, intr1, coord2, intr2 = calculateCSNCoordinates(variant, transcript)
 
@@ -267,10 +268,11 @@ def makeDNAannotationNew(variant, transcript, reference):
 
 
 # Calculating protein level annotation of the variant
-def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
+def makeProteinString(variant, transcript, reference, prot0, mutprot0, coord1):
 
-    protcopy = prot[:]
-
+    prot=prot0+''
+    mutprot=mutprot0+''
+    protcopy = prot[:]+''
     # Checking if there was no change in protein sequence
     if prot == mutprot:
         idx = int(coord1 / 3)
@@ -294,9 +296,11 @@ def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
     if prot == '': return '', ('.','.','.')
 
     # Frameshift mutations
-    if (len(variant.alt) - len(variant.ref)) % 3 > 0:
-        if len(prot) > 0: return '', (str(leftindex), prot[0], '.')
-    else: return '', (str(leftindex), '.', '.')
+    if (len(variant.alt) - len(variant.ref)) % 3 != 0:
+        if len(prot) > 0: 
+            return '', (str(leftindex), prot[0], '.')
+        else:
+            return '', (str(leftindex), '.', '.')
 
     # Checking if variant results in a stop lost mutation
     if prot[0] == 'X' and len(mutprot) == 0:
@@ -319,8 +323,8 @@ def makeProteinString(variant, transcript, reference, prot, mutprot, coord1):
             break
 
     # Checking if variant results in an amino acid change
-    if len(prot) == 1 and len(mutprot) == 1: return '_p.' + changeTo3letters(prot) + str(leftindex) + changeTo3letters(
-        mutprot), (str(leftindex), prot, mutprot)
+    if len(prot) == 1 and len(mutprot) == 1: 
+        return '_p.' + changeTo3letters(prot) + str(leftindex) + changeTo3letters(mutprot), (str(leftindex), prot, mutprot)
 
     # Checking if variant results in a deletion
     if len(mutprot) == 0:
