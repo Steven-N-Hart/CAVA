@@ -1,4 +1,4 @@
-#!env/bin/env python3
+#!/bin/env python3
 import os
 from optparse import OptionParser
 
