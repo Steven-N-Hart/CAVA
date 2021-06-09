@@ -4,19 +4,20 @@
 # CSN annotation
 #######################################################################################################################
 import cava_.core as core
+import sys
 
 
 
 # Class representing a CSN annotation
 class CSNAnnot():
     # Constructor
-    def __init__(self, coord1, intr1, coord2, intr2, dna, protein, coord1_ins, intr1_ins, coord2_ins, intr2_ins,
+    def __init__(self, coord1, intr1, coord2, intr2, dnaf, protein, coord1_ins, intr1_ins, coord2_ins, intr2_ins,
                  dna_ins):
         self.coord1 = coord1
         self.intr1 = intr1
         self.coord2 = coord2
         self.intr2 = intr2
-        self.dna = dna
+        self.dna = dnaf
         self.protein = protein
         self.coord1_ins = coord1_ins
         self.intr1_ins = intr1_ins
@@ -269,6 +270,19 @@ def makeDNAannotationNew(variant, transcript, reference):
 
 # Calculating protein level annotation of the variant
 def makeProteinString(variant, transcript, reference, prot0, mutprot0, coord1):
+    """
+
+    :param variant:
+    :param transcript:  This paremeter is not used.. kept in case nomenclature changes back to requiring DNA checks.
+    :param reference: This paremeter is not used.. kept in case nomenclature changes back to requiring DNA checks.
+    :param prot0:
+    :param mutprot0:
+    :param coord1:
+    :return:
+    """
+
+    if len(prot0) == 0: # Do not support mutating an empty protein (what does it even mean biologically???)
+        return '', ('.', '.', '.')
 
     prot=prot0+''
     mutprot=mutprot0+''
@@ -280,7 +294,7 @@ def makeProteinString(variant, transcript, reference, prot0, mutprot0, coord1):
         return '_p.=', (str(idx), prot[idx-1], prot[idx-1])
 
     # Checking if the variant affects the initiating amino acid
-    if prot[0] != mutprot[0]: return '_p.' + changeTo3letters(prot[0]) + '1?', ('1', prot[0], mutprot[0])
+    if len(prot)>0 and len(mutprot)>0 and prot[0] != mutprot[0] : return '_p.' + changeTo3letters(prot[0]) + '1?', ('1', prot[0], mutprot[0])
 
     # Trimming common starting substring
     leftindex = 1
@@ -293,7 +307,8 @@ def makeProteinString(variant, transcript, reference, prot0, mutprot0, coord1):
         else:
             break
 
-    if prot == '': return '', ('.','.','.')
+    # No protein Mutations.
+    if len(prot) == 0 and len(mutprot) == 0: return '_p.=', ('.','.','.')
 
     # Frameshift mutations
     if (len(variant.alt) - len(variant.ref)) % 3 != 0:
@@ -312,6 +327,12 @@ def makeProteinString(variant, transcript, reference, prot0, mutprot0, coord1):
             return '_p.X' + str(leftindex) + changeTo3letters(mutprot[0]) + 'extX' + str(nextstop), (str(leftindex), 'X', mutprot[0])
         else:
             return '_p.X' + str(leftindex) + changeTo3letters(mutprot[0]) + 'extX?', (str(leftindex), 'X', mutprot[0])
+
+    # checking if protein gets an early stop . Iy does not matter if from frameshift or in-frame
+
+    if mutprot[0] == 'X' and len(prot)>0 and prot[0] != 'X':
+        if len(prot) > 0:
+            return '_p.' + str(leftindex) + changeTo3letters(prot[0]),
 
     # Trimming common ending substring
     while len(prot) > 0 and len(mutprot) > 0:
@@ -567,13 +588,15 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
     if (rightindex<len(protcopy) and len(trim_mutprot)==0 and is_not_frameshift):
         nDup=0
 # Loop over potential repeat sizes (Smaller repeat sizes have priority)
+        lowerlim = leftindex
+        upperim = lowerlim+1
         for SSRlen in range(1,len(trim_prot)+1):
 # Make sure repeat size is a full multiple of the deletion
             nDups=int(len(trim_prot)/SSRlen)
+            nMatch_del = 0
+            nMatch_ref = 0
             if nDups>=1 and len(trim_prot) % SSRlen ==0 :
                 repeat_seq=trim_prot[0:SSRlen]
-                nMatch_del=0
-                nMatch_ref=0
 # Check if the repeat pattern matches every base of the trim_prot
                 for iDup in range(0,nDups):
                     if trim_prot[(0+SSRlen*iDup):(SSRlen*(iDup+1))]==repeat_seq:
@@ -623,14 +646,16 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
     xindex=trim_mutprot.find('X')
     if leftindex>1 and rightindex<len(protcopy) and len(trim_prot)==0 and len(trim_mutprot)>0 and is_not_frameshift:
         nDup=0
+        lowerlim = leftindex
+        upperlim = lowerlim +1
 # Loop over potential repeat sizes (Smaller repeat sizes have priority)
         for SSRlen in range(1,len(trim_mutprot)+1):
 # Make sure repeat size is a full multiple of the deletion
             nDups=int(len(trim_mutprot)/SSRlen)
+            nMatch_ins = 0
+            nMatch_ref = 0
             if nDups>=1 and len(trim_mutprot) % SSRlen ==0 :
                 repeat_seq=trim_mutprot[0:SSRlen]
-                nMatch_ins=0
-                nMatch_ref=0
 # Check if the repeat pattern matches every base of the trim_prot
                 for iDup in range(0,nDups):
                     if trim_mutprot[(0+SSRlen*iDup):(SSRlen*(iDup+1))]==repeat_seq:
@@ -644,7 +669,7 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
                     while lowerlim>=0 and protcopy[lowerlim:upperlim]==repeat_seq:
                         nMatch_ref=nMatch_ref+1
                         lowerlim=lowerlim-SSRlen
-                        upperlime=lowerlim+SSRlen
+                        upperlim=lowerlim+SSRlen
                     if nMatch_ref>0: # We require a copy to be present on the reference "protein" .. as per HGVS
                         nDup=nDups
                         lowerlim=leftindex-SSRlen*(nMatch_ref)-1
@@ -707,7 +732,7 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
                         return '_p.'+changeTo3lettersTer(prot[0])+str(len(protcopy))+changeTo3lettersTer(mutprot[0])+'extX'+str(xindex+1),(str(leftindex),prot[0],mutprot[0:(xindex+1)])
                     # else Frameshift occuring before the end of the protein with the Ter occuring a few AA later at the original prot position (will be dealt below)
                 if xindex==0 and len(prot)>1  : #First Modified Base is a stop codon before end (Independent wether mutation is deletion or insertion
-                    return '_p.'+changeTo3lettersTer(prot[0])+str(leftindex)+'Ter',(str(leftindex),prot[0],mut[0])
+                    return '_p.'+changeTo3lettersTer(prot[0])+str(leftindex)+'Ter',(str(leftindex),prot[0],mutprot[0])
                 if leftindex<len(protcopy) and xindex+1<= len(prot): #First Modified Base before the end of the protein .. and new Stop not past original Stop (e.g. not an extension)
                                                                      # (btw Minimal length of prot==2 for protein ending in Ter)
                     if len(trim_prot) == 0: # insertion
@@ -739,8 +764,6 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
 
 
     # Trimming common ending substring
-    prot=trim_prot
-    mutprot=trim_mutprot
 
     prot=trim_prot
     mutprot=trim_mutprot
@@ -792,6 +815,7 @@ def makeProteinStringNew(variant, transcript, reference, prot, mutprot, coord1):
         else:
             protpos = str(leftindex) + '-' + str(rightindex)
         return ret, (protpos, trim_prot, trim_mutprot)
+
     sys.stderr.write("\nBUG: Cannot compute CSN for : original prot="+protcopy+"\n   : Cannot compute CSN for : mutated  prot="+mutprotcopy+"\n")
 
 

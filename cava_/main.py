@@ -100,6 +100,7 @@ def findFileBreaks(inputf, threads):
     ret = []
     started = False
     counter = 0
+    first = 0
 
     if inputf.endswith('.gz'):
         infile = gzip.open(inputf, 'rt')

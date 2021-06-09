@@ -9,6 +9,7 @@ import gzip
 import logging
 import os
 import time
+import sys
 
 
 #######################################################################################################################
@@ -311,7 +312,6 @@ class Record(object):
         if outformat.upper() == 'VCF':
 
             # Creating first part of the VCF record (up to FILTER field)
-
             chromstr = 'chr' + self.chrom if self.chrom_chr_prefix else self.chrom
             record = [chromstr, str(self.pos), self.id, self.ref, ",".join(outalts), self.qual, self.filter]
 
