@@ -1,0 +1,38 @@
+..............................
+----------------------------------------------------------------------
+Ran 30 tests in 0.003s
+
+OK
+Early Stop - 3rd pos of 6
+
+Early Stop - 3rd pos of 6
+
+Early Stop - 2nd pos of 3
+
+Testing checking check frameshift
+Testing checking Deletion
+Testing checking 3AA Insertion that contains a Ter in the middle
+Testing checking long extension in phase
+Testing checking long extension not in phase
+Testing checking long frameshift
+Testing checking 1 AA insertion after Met
+Testing checking insertion after Met
+Testing checking extension
+Testing checking frameshift with mutprot<prot
+Testing deletion of 1AA
+Testing deletion 2AA
+Testing deletion of Initial Methionine
+Testing checking delins
+Testing checking delins affecting Stop Should be an FS 
+Testing checking delins 1 AA becoming 3 (with Ter in middle) 
+Testing checking dup of 1 base
+Testing checking dup of pattern 2 AA long
+Testing prot= empty
+
+Testing checking delins
+Testing checking 1 to 3 copies of 1-long SSR
+Testing checking ssr 2-long deletion
+Testing checking ssr 0 to 3 copies of 2-long SSR .. should not be an SSR
+Testing checking ssr 1 to 3 copies of 2-long SSR
+Testing checking ssr 2-long deletion to 0
+Testing checking ssr 2-long deletion

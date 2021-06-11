@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 
 
 # CLASS annotation
@@ -40,6 +41,7 @@ def getClassAnnotation(variant, transcript, protein, mutprotein, loc, ssrange):
     # Variants affecting the initiation amino acid
     if protein[0] != mutprotein[0]: return 'IM'
 
+    prot0 = protein + ""  # Create new object immutable string
     # Stop gain and stop lost variants
     while len(protein) > 0 and len(mutprotein) > 0:
         if protein[0] == mutprotein[0]:
@@ -47,17 +49,40 @@ def getClassAnnotation(variant, transcript, protein, mutprotein, loc, ssrange):
             mutprotein = mutprotein[1:]
         else:
             break
+    # protein == '' .
+    # all 5' region is identical, but there remains some protein in the 3' area of the mutated protein
+    # option 1: Protein is partial on 3' end and our algorithm for creating a mutant protein goes to the next stop
+    #     .. In all fairness, partial proteins are not covered by the HGVS standard . We cannot call this an extension
+    #        as extensions require an existing Ter be moved downstream
+    #      should we call this a stop gain?
+    # option 2: Mutation is past end of Stop codon ==> Call this a 3PU
+    # option 3: There is a frame-shift that creates a stop codon AND additional protein :
+    #   Not possible: We stop at the Stop codon
 
-    if protein == '' and variant.isInFrame(): return '3PU'
+    if protein == '':
+        if len(prot0) == 0:
+            sys.stderr.write("SEVERE WARNING: Length of reference protein ==0 for variant " + variant.info() + "\n")
+        elif prot0[len(prot0) - 1] != 'X':
+            sys.stderr.write(
+                "SEVERE WARNING: Partial Reference protein not ending in stop for variant " + variant.info() + "\n")
+        else:
+            sys.stderr.write(
+                "SEVERE WARNING: Variant has additional protein sequence past Stop " + variant.info() + "\n")
+        return '3PU'
 
-    if protein[0] == 'X' and len(mutprotein) == 0: return 'SL'
-    if protein[0] == 'X' and mutprotein[0] != 'X': return 'SL'
+    if len(protein) > 0 and protein[0] == 'X' and len(mutprotein) == 0: return 'SL'
+    if len(protein) > 0 and protein[0] == 'X' and mutprotein[0] != 'X': return 'SL'
 
-    # Frame-shift coding variants, where the first AA leads change leads to a Stop Gain
-    if len(mutprotein)>0 and mutprotein[0]=='X' and len(protein)>0 and mutprotein[0]!=protein[0] and not variant.isInFrame(): return 'SG'
+    if len(mutprotein) > 0 and \
+            mutprotein[0] == 'X' and \
+            len(protein) > 0 and \
+            mutprotein[0] != protein[0] and \
+            not variant.isInFrame():
+        return 'SG'
 
     # Frame-shift coding variants
-    if not variant.isInFrame(): return 'FS'
+    if not variant.isInFrame():
+        return 'FS'
 
     while len(protein) > 0 and len(mutprotein) > 0:
         if protein[-1] == mutprotein[-1]:
@@ -66,16 +91,18 @@ def getClassAnnotation(variant, transcript, protein, mutprotein, loc, ssrange):
         else:
             break
 
-    # Stop Gain that is not a frame-shift
-    if 'X' in mutprotein: return 'SG'
+    if 'X' in mutprotein:
+        return 'SG'
 
     # Non-synonymous coding variants
     if protL == mutprotL:
-        if potSS: return 'EE'
+        if potSS:
+            return 'EE'
         return 'NSY'
 
     # In-frame variants
-    if potSS: return 'EE'
+    if potSS:
+        return 'EE'
     return 'IF'
 
 

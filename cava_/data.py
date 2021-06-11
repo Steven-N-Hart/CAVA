@@ -31,8 +31,7 @@ class Ensembl(object):
         self.codon_usage = codon_usage
         # Transcript to Protein Map for HGVSp protein
         # copy it over to "self" in order to maintain the calling function signature of Record.annotate() called by run() (main.py)
-        self.transcript2protein=options.transcript2protein
-
+        self.transcript2protein = options.transcript2protein
 
     # Find transcripts overlapping with a variant
     def findTranscripts(self, variant, strand, reference):
@@ -93,7 +92,7 @@ class Ensembl(object):
                     if not key in list(hitdict1.keys()):
                         retOUT[key] = transcript
 
-        else: # Variant is Substitution
+        else:  # Variant is Substitution
             hits1 = self.tabixfile.fetch(region=reg2)
             for line in hits1:
                 transcript = core.Transcript(line, reference)
@@ -370,9 +369,8 @@ class Ensembl(object):
                 if TRANSCRIPT in list(transcripts_minus.keys()):
                     csn_minus, protchange_minus = csn.getAnnotation(variant_minus, transcript, reference, protein,
                                                                     mutprotein_minus)
-
-                    csn_minus_hgvs, protchange_minus = csn.getAnnotation(variant_minus, transcript, reference, protein,
-                                                                    mutprotein_minus)
+                    csn_minus_hgvs, protchange_minus = csn.getAnnotationNew(variant_minus, transcript, reference,
+                                                                            protein, mutprotein_minus)
                     csn_minus_str = csn_minus.getAsString()
                     csn_minus_hgvs_str = csn_minus_hgvs.getAsString()
                 else:
@@ -444,7 +442,6 @@ class Ensembl(object):
 
                 else:
                     so_minus = so_plus
-
 
             # Deciding which is the correct CSN and CLASS annotation
             if transcript.strand == 1:
@@ -629,6 +626,7 @@ class Reference(object):
             last = self.fastafile.get_reference_length(goodchrom)
 
         if end > last: end = last
+
         seq = self.fastafile.fetch(goodchrom, start - 1, end)
         return core.Sequence(seq.upper())
 

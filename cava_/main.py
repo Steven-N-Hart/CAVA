@@ -35,7 +35,7 @@ def printInputFileNames(copts, options):
     print('Configuration file:  ' + copts.conf)
     print('Input file (' + options.args['inputformat'] + '):    ' + copts.input)
     print('Output file (' + options.args['outputformat'] + '):   ' + outfn)
-    if options.args['logfile']:  
+    if options.args['logfile']:
         print('Log file:            ' + copts.output + '.log')
     if copts.threads > 1:
         print('\nMultithreading:      ' + str(copts.threads) + ' threads')
@@ -260,12 +260,12 @@ class SingleJob(multiprocessing.Process):
 
         if not copts.stdout and threadidx == 1: initProgressInfo()
 
-# Reading (new) transcript2protein map for HGVSP annotation
+        # Reading (new) transcript2protein map for HGVSP annotation
         if options.args['logfile'] and threadidx == 1:
             logging.info("INFO: reading transcript2protein file\n")
-        options.transcript2protein=core.read_dict(options,'transcript2protein')
-        if options.args['logfile'] and threadidx==1:
-            logging.info("transcript2protein has "+str(len(options.transcript2protein))+" mappings\n")
+        options.transcript2protein = core.read_dict(options, 'transcript2protein')
+        if options.args['logfile'] and threadidx == 1:
+            logging.info("transcript2protein has " + str(len(options.transcript2protein)) + " mappings\n")
 
     # Running process
     def run(self):
@@ -302,7 +302,8 @@ class SingleJob(multiprocessing.Process):
 
             # Only include records of allowed chromosome names
             if record.chrom not in self.chroms:
-                logging.warning("\t!!!!!!Chromosome " + record.chrom + " not found, skipping annotation, but still printing!!!!!!\n")
+                logging.warning(
+                    "\t!!!!!!Chromosome " + record.chrom + " not found, skipping annotation, but still printing!!!!!!\n")
             else:
                 # Annotating the record based on the Ensembl, dbSNP and reference data
                 record.annotate(self.ensembl, self.dbsnp, self.reference, self.impactdir)
@@ -369,10 +370,10 @@ def run(copts, version):
     transcriptlist = core.readSet(options, 'transcriptlist')
     snplist = core.readSet(options, 'snplist')
 
-# Reading (new) transcript2protein map for HGVSP annotation
+    # Reading (new) transcript2protein map for HGVSP annotation
     print("INFO: reading transcript2protein file\n")
-    options.transcript2protein=core.read_dict(options,'transcript2protein')
-    print("transcript2protein has "+str(len(options.transcript2protein))+" mappings\n")
+    options.transcript2protein = core.read_dict(options, 'transcript2protein')
+    print("transcript2protein has " + str(len(options.transcript2protein)) + " mappings\n")
     # Parsing @impactdef string
     if not (options.args['impactdef'] == '.' or options.args['impactdef'] == ''):
         impactdir = dict()
