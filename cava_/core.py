@@ -29,6 +29,7 @@ class Variant(object):
         self.alt = Sequence(y)
         self.flags = []
         self.flagvalues = []
+        self.PROT = None
 
     # Getting basic information about variant
     def info(self):

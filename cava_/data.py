@@ -313,7 +313,7 @@ class Ensembl(object):
                     loc_minus = '.'
             else:
                 loc_minus = loc_plus
-
+            exonseqs = None
             # Creating reference and mutated protein sequence
             notexonic_plus = (
                     ('5UTR' in loc_plus) or ('3UTR' in loc_plus) or ('-' in loc_plus) or ('In' in loc_plus) or (
@@ -357,9 +357,9 @@ class Ensembl(object):
             # Creating the CSN annotations both for left and right aligned variant
             if TRANSCRIPT in list(transcripts_plus.keys()):
                 csn_plus, protchange_plus = csn.getAnnotation(variant_plus, transcript, reference, protein,
-                                                              mutprotein_plus)
-                csn_plus_hgvs, protchange_plus = csn.getAnnotationNew(variant_plus, transcript, reference, protein,
-                                                              mutprotein_plus)
+                                                              mutprotein_plus, strict_hgvs=False)
+                csn_plus_hgvs, protchange_plus = csn.getAnnotation(variant_plus, transcript, reference, protein,
+                                                              mutprotein_plus, strict_hgvs=True)
                 csn_plus_str = csn_plus.getAsString()
                 csn_plus_hgvs_str = csn_plus_hgvs.getAsString()
             else:
@@ -368,9 +368,9 @@ class Ensembl(object):
             if difference:
                 if TRANSCRIPT in list(transcripts_minus.keys()):
                     csn_minus, protchange_minus = csn.getAnnotation(variant_minus, transcript, reference, protein,
-                                                                    mutprotein_minus)
-                    csn_minus_hgvs, protchange_minus = csn.getAnnotationNew(variant_minus, transcript, reference,
-                                                                            protein, mutprotein_minus)
+                                                                    mutprotein_minus, strict_hgvs=False)
+                    csn_minus_hgvs, protchange_minus = csn.getAnnotation(variant_minus, transcript, reference,
+                                                                            protein, mutprotein_minus, strict_hgvs=True)
                     csn_minus_str = csn_minus.getAsString()
                     csn_minus_hgvs_str = csn_minus_hgvs.getAsString()
                 else:
