@@ -1,3 +1,10 @@
+# THIS REPO IS DEPRECATED. PLEASE USE [THIS ONE](https://github.com/sicotteh/CAVA) INSTEAD
+#  
+#  
+#  
+#  
+#  
+
 * [CAVA README](#cava-readme)
     * [1 INTRODUCTION](#1-introduction)
     * [2 PUBLICATION](#2-publication)
